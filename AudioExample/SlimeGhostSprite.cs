@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
 using CollisionExample.Collisions;
+using Microsoft.Xna.Framework.Audio;
 
 namespace AudioExample
 {
@@ -37,6 +38,18 @@ namespace AudioExample
         public Color Color { get; set; } = Color.White;
 
         /// <summary>
+        /// The audio listener for this ghost
+        /// </summary>
+        public AudioListener AudioListener { get; } = new AudioListener();
+
+        public SlimeGhostSprite()
+        {
+            AudioListener.Up = Vector3.UnitZ;
+            AudioListener.Position = new Vector3(position, 0);
+            AudioListener.Forward = Vector3.UnitY;
+        }
+
+        /// <summary>
         /// Loads the sprite texture using the provided ContentManager
         /// </summary>
         /// <param name="content">The ContentManager to load with</param>
@@ -51,8 +64,11 @@ namespace AudioExample
         /// <param name="gameTime">The GameTime</param>
         public void Update(GameTime gameTime)
         {
+            Vector2 facing;
             gamePadState = GamePad.GetState(0);
             keyboardState = Keyboard.GetState();
+
+            facing = gamePadState.ThumbSticks.Left;
 
             // Apply the gamepad movement with inverted Y axis
             position += gamePadState.ThumbSticks.Left * new Vector2(1, -1);
@@ -60,17 +76,35 @@ namespace AudioExample
             if (gamePadState.ThumbSticks.Left.X > 0) flipped = false;
 
             // Apply keyboard movement
-            if (keyboardState.IsKeyDown(Keys.Up) || keyboardState.IsKeyDown(Keys.W)) position += new Vector2(0, -1);
-            if (keyboardState.IsKeyDown(Keys.Down) || keyboardState.IsKeyDown(Keys.S)) position += new Vector2(0, 1);
+            if (keyboardState.IsKeyDown(Keys.Up) || keyboardState.IsKeyDown(Keys.W)) 
+            {
+                facing = new Vector2(0, 1);
+                position += new Vector2(0, -1); 
+            } 
+            if (keyboardState.IsKeyDown(Keys.Down) || keyboardState.IsKeyDown(Keys.S))
+            {
+                facing = new Vector2(0, -1);
+				position += new Vector2(0, 1);
+			}
+               
             if (keyboardState.IsKeyDown(Keys.Left) || keyboardState.IsKeyDown(Keys.A))
-            { 
-                position += new Vector2(-1, 0);
+            {
+				facing = new Vector2(-1, 0);
+				position += new Vector2(-1, 0);
                 flipped = true;
             }
             if (keyboardState.IsKeyDown(Keys.Right) || keyboardState.IsKeyDown(Keys.D))
             {
-                position += new Vector2(1, 0);
+				facing = new Vector2(1, 0);
+				position += new Vector2(1, 0);
                 flipped = false;
+            }
+
+            // Update position and facing of audio listener
+            AudioListener.Position = new Vector3(position, 0);
+            if (position == Vector2.Zero)
+            {
+                new Vector3(facing, 0);
             }
 
             // Update the bounds

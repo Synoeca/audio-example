@@ -71,7 +71,7 @@ namespace AudioExample
             coinPickup = Content.Load<SoundEffect>("Pickup_Coin4");
             backgroundMusic = Content.Load<Song>("DeeYan-Key-TheGame");
             MediaPlayer.IsRepeating = true;
-            MediaPlayer.Play(backgroundMusic);
+           // MediaPlayer.Play(backgroundMusic);
         }
 
         /// <summary>
@@ -97,6 +97,7 @@ namespace AudioExample
                     coinsLeft--;
                     coinPickup.Play();
                 }
+                coin.Update(gameTime, slimeGhost.AudioListener);
             }
 
             base.Update(gameTime);

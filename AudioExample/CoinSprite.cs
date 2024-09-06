@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
 using CollisionExample.Collisions;
+using Microsoft.Xna.Framework.Audio;
 
 namespace AudioExample
 {
@@ -26,7 +27,24 @@ namespace AudioExample
 
         private BoundingCircle bounds;
 
-        public bool Collected { get; set; } = false;
+        private AudioEmitter emitter = new AudioEmitter();
+
+        private SoundEffectInstance sfxInstance;
+
+        private bool collected = false;
+
+        public bool Collected 
+        { 
+            get { return collected; }
+            set
+            {
+                collected = value;
+                if (collected)
+                {
+                    sfxInstance.Stop();
+                }
+            }
+        }
 
         /// <summary>
         /// The bounding volume of the sprite
@@ -41,6 +59,9 @@ namespace AudioExample
         {
             this.position = position;
             this.bounds = new BoundingCircle(position + new Vector2(8, 8), 8);
+            this.emitter.Position = new Vector3(position, 0);
+            this.emitter.Up = Vector3.UnitZ;
+            this.emitter.Forward = Vector3.UnitY;
         }
 
         /// <summary>
@@ -50,6 +71,16 @@ namespace AudioExample
         public void LoadContent(ContentManager content)
         {
             texture = content.Load<Texture2D>("coins");
+            SoundEffect sfx = content.Load<SoundEffect>("Powerup");
+            sfxInstance = sfx.CreateInstance();
+            sfxInstance.IsLooped = true;
+            sfxInstance.Play();
+        }
+
+        public void Update(GameTime gameTime, AudioListener listener)
+        {
+            emitter.Forward = listener.Position - emitter.Position;
+            sfxInstance.Apply3D(listener, emitter);
         }
 
         /// <summary>
